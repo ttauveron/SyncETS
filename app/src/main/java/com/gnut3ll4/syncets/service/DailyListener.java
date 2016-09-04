@@ -33,7 +33,7 @@ public class DailyListener implements WakefulIntentService.AlarmListener {
 //        calendar.set(Calendar.SECOND, 0);
 
         mgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_HOUR/60/60, pi);
+                AlarmManager.INTERVAL_HOUR * 4, pi);
 //                AlarmManager.INTERVAL_DAY, pi);
 //        }
     }

@@ -33,4 +33,6 @@ dependencies {
     compile 'com.android.support:design:24.2.0'
 
     compile 'com.commonsware.cwac:wakeful:1.0.5'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.scottyab:secure-preferences-lib:0.1.4'
 }

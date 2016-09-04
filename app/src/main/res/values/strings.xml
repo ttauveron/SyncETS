@@ -83,4 +83,12 @@
     <string name="notif_moodle_title">Moodle Notifications</string>
     <string name="notification">Notification</string>
     <string name="synchronization">Synchronisation</string>
+    <string name="universal_code">Universal code</string>
+    <string name="password">Password</string>
+    <string name="login_activity">Login</string>
+    <string name="logout">Logout</string>
+    <string name="about">About</string>
+    <string name="confirm_logout">Are you sure you want to logout?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

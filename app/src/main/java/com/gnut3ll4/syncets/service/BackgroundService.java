@@ -22,5 +22,7 @@ public class BackgroundService extends WakefulIntentService {
     @Override
     public void doWakefulWork(Intent intent) {
         Log.e("TEST", "BACKGROUND TASK EXECUTING.......");
+
+
     }
 }
