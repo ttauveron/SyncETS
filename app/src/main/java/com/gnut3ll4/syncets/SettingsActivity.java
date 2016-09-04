@@ -5,6 +5,9 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import com.commonsware.cwac.wakeful.WakefulIntentService;
+import com.gnut3ll4.syncets.service.DailyListener;
+
 public class SettingsActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
@@ -15,6 +18,8 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        WakefulIntentService.scheduleAlarms(new DailyListener(), this, false);
 
         getFragmentManager().beginTransaction().replace(R.id.flContent, new MyPreferenceFragment()).commit();
     }
