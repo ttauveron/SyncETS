@@ -73,4 +73,12 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="sync_courses_summary">Synchronize ÉTS courses schedule</string>
+    <string name="sync_courses_title">Courses Sync</string>
+    <string name="sync_moodle_summary">Synchronise Moodle deadlines</string>
+    <string name="sync_moodle_title">Moodle Sync</string>
+    <string name="notif_courses_summary">Display a notification for a course 15 minutes before it starts</string>
+    <string name="notif_courses_title">Courses Notifications</string>
+    <string name="notif_moodle_summary">Display a notification a day before each Moodle deadline</string>
+    <string name="notif_moodle_title">Moodle Notifications</string>
 </resources>

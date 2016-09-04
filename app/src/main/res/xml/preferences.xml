@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference android:title="Your Name"
-        android:key="username"
-        android:summary="Please provide your username"></EditTextPreference>
-    <CheckBoxPreference android:title="Application Updates"
-        android:defaultValue="false"
-        android:summary="This option if selected will allow the application to check for latest versions."
-        android:key="applicationUpdates" />
-    <ListPreference     android:title="Download Details"
-        android:summary="Select the kind of data that you would like to download"
-        android:key="downloadType"
-        android:defaultValue="1"
-        android:entries="@array/listArray"
-        android:entryValues="@array/listValues" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_sync_courses"
+        android:summary="@string/sync_courses_summary"
+        android:title="@string/sync_courses_title" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_sync_moodle"
+        android:summary="@string/sync_moodle_summary"
+        android:title="@string/sync_moodle_title" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_notif_courses"
+        android:summary="@string/notif_courses_summary"
+        android:title="@string/notif_courses_title" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_notif_moodle"
+        android:summary="@string/notif_moodle_summary"
+        android:title="@string/notif_moodle_title" />
 </PreferenceScreen>
