@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="pref_sync_courses"
-        android:summary="@string/sync_courses_summary"
-        android:title="@string/sync_courses_title" />
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="pref_sync_moodle"
-        android:summary="@string/sync_moodle_summary"
-        android:title="@string/sync_moodle_title" />
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="pref_notif_courses"
-        android:summary="@string/notif_courses_summary"
-        android:title="@string/notif_courses_title" />
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="pref_notif_moodle"
-        android:summary="@string/notif_moodle_summary"
-        android:title="@string/notif_moodle_title" />
+    <Preference
+        android:key="pref_static_field_key"
+        android:selectable="false"
+        android:persistent="false"
+        android:summary="This app runs a sync every 4 hours"/>
+
+    <PreferenceCategory android:title="@string/synchronization">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_sync_courses"
+            android:summary="@string/sync_courses_summary"
+            android:title="@string/sync_courses_title" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_sync_moodle"
+            android:summary="@string/sync_moodle_summary"
+            android:title="@string/sync_moodle_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/notification">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_notif_courses"
+            android:summary="@string/notif_courses_summary"
+            android:title="@string/notif_courses_title" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_notif_moodle"
+            android:summary="@string/notif_moodle_summary"
+            android:title="@string/notif_moodle_title" />
+    </PreferenceCategory>
 </PreferenceScreen>
