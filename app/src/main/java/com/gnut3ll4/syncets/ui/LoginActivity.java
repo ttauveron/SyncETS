@@ -11,6 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gnut3ll4.signetswebserivces.soap.IServiceEvents;
+import com.gnut3ll4.signetswebserivces.soap.OperationResult;
+import com.gnut3ll4.signetswebserivces.soap.SignetsMobileSoap;
 import com.gnut3ll4.syncets.ApplicationManager;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.model.UserCredentials;
@@ -67,15 +70,28 @@ public class LoginActivity extends AppCompatActivity {
 
         userCredentials = new UserCredentials(email, password);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
+        SignetsMobileSoap signetsMobileSoap = new SignetsMobileSoap(new IServiceEvents() {
+            @Override
+            public void Starting() {
+
+            }
+
+            @Override
+            public void Completed(OperationResult result) {
+                progressDialog.dismiss();
+                if(result.Result instanceof Boolean) {
+                    Boolean isLoginValid = (Boolean) result.Result;
+
+                    if(isLoginValid) {
                         onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
+                        return;
                     }
-                }, 3000);
+                }
+                 onLoginFailed();
+            }
+        });
+
+        signetsMobileSoap.donneesAuthentificationValidesAsync(userCredentials.getUsername(), userCredentials.getPassword());
     }
 
 
@@ -117,26 +133,26 @@ public class LoginActivity extends AppCompatActivity {
         _loginButton.setEnabled(true);
     }
 
-    public boolean validate() {
-        boolean valid = true;
-
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
-
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailText.setError("enter a valid email address");
-            valid = false;
-        } else {
-            _emailText.setError(null);
-        }
-
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
-            valid = false;
-        } else {
-            _passwordText.setError(null);
-        }
-
-        return valid;
-    }
+//    public boolean validate() {
+//        boolean valid = true;
+//
+//        String email = _emailText.getText().toString();
+//        String password = _passwordText.getText().toString();
+//
+//        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+//            _emailText.setError("enter a valid email address");
+//            valid = false;
+//        } else {
+//            _emailText.setError(null);
+//        }
+//
+//        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
+//            _passwordText.setError("between 4 and 10 alphanumeric characters");
+//            valid = false;
+//        } else {
+//            _passwordText.setError(null);
+//        }
+//
+//        return valid;
+//    }
 }

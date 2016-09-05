@@ -13,8 +13,13 @@ buildscript {
 }
 
 allprojects {
+
     repositories {
         jcenter()
+        maven { //TODO remove that and use jcenter after approbation
+            url  "http://dl.bintray.com/gnut3ll4/etsmtl-signets-webservices"
+        }
+
     }
 }
 
