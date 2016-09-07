@@ -27,11 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        WakefulIntentService.scheduleAlarms(new DailyListener(), this, false);
-
         getFragmentManager().beginTransaction().replace(R.id.flContent, new MyPreferenceFragment()).commit();
-
-
     }
 
     @Override
