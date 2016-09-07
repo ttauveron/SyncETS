@@ -4,7 +4,6 @@ package com.gnut3ll4.syncets.ui;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -20,17 +19,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
-import com.gnut3ll4.signetswebserivces.soap.IServiceEvents;
-import com.gnut3ll4.signetswebserivces.soap.OperationResult;
-import com.gnut3ll4.signetswebserivces.soap.SignetsMobileSoap;
+import com.gnut3ll4.signetswebservices.soap.IServiceEvents;
+import com.gnut3ll4.signetswebservices.soap.OperationResult;
+import com.gnut3ll4.signetswebservices.soap.SignetsMobileSoap;
 import com.gnut3ll4.syncets.ApplicationManager;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.model.UserCredentials;
 import com.gnut3ll4.syncets.service.DailyListener;
 import com.gnut3ll4.syncets.utils.Constants;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.AccountPicker;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
@@ -42,16 +38,14 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.securepreferences.SecurePreferences;
 
-//import com.google.android.gms.auth.aGoogleAuthUtil;
-
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
+
+//import com.google.android.gms.auth.aGoogleAuthUtil;
 
 
 public class LoginActivity extends AppCompatActivity {
