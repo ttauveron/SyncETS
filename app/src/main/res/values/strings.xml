@@ -92,4 +92,5 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ets_calendar">ÉTS Calendar</string>
+    <string name="ets_tasklist">ÉTS Assignments</string>
 </resources>

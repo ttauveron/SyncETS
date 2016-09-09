@@ -36,6 +36,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.tasks.Tasks;
+import com.google.api.services.tasks.TasksScopes;
 import com.securepreferences.SecurePreferences;
 
 import java.io.IOException;
@@ -44,9 +46,6 @@ import java.util.Arrays;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import pub.devrel.easypermissions.AfterPermissionGranted;
-
-//import com.google.android.gms.auth.aGoogleAuthUtil;
-
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
@@ -66,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
     private UserCredentials userCredentials;
     private SecurePreferences securePreferences;
 
-    private static final String[] SCOPES = { CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_READONLY };
+    private static final String[] SCOPES = { CalendarScopes.CALENDAR, TasksScopes.TASKS};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -226,12 +225,16 @@ public class LoginActivity extends AppCompatActivity {
                 Calendar calendar = new Calendar.Builder(transport, jsonFactory, mCredential)
                         .setApplicationName("SyncETS")
                         .build();
-
+                Tasks taskClient = new Tasks.Builder(
+                        transport, jsonFactory, mCredential)
+                        .setApplicationName("SyncETS")
+                        .build();
 
                 new AsyncTask<Void, Void, String>() {
                     protected String doInBackground(Void... params) {
                         try {
                             calendar.calendarList().list().execute().getItems();
+                            taskClient.tasklists().list().execute().getItems();
 
                             WakefulIntentService.scheduleAlarms(new DailyListener(), getApplicationContext(), false);
 

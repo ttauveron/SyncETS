@@ -27,6 +27,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        pickFirst 'META-INF/maven/com.squareup.okio/okio/pom.xml'
+        pickFirst 'META-INF/maven/com.squareup.okio/okio/pom.properties'
+    }
 }
 
 repositories {
@@ -35,6 +40,8 @@ repositories {
     }
 }
 
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
@@ -42,10 +49,13 @@ dependencies {
     compile 'com.android.support:support-v4:24.2.0'
     compile 'com.android.support:design:24.2.0'
 
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'com.commonsware.cwac:wakeful:1.0.5'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.scottyab:secure-preferences-lib:0.1.4'
-    compile 'com.gnut3ll4:etsmtl-signets-webservices:0.0.5'
+    compile('com.gnut3ll4:etsmtl-signets-webservices:0.0.5') {
+        exclude group: 'com.squareup.okhttp', module: 'okhttp'
+    }
     compile 'joda-time:joda-time:2.9.4'
 
     compile 'com.google.android.gms:play-services-auth:9.0.2'
@@ -56,7 +66,12 @@ dependencies {
     compile('com.google.apis:google-api-services-calendar:v3-rev209-1.22.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-
+    compile('com.google.apis:google-api-services-tasks:v1-rev45-1.22.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
+
+    compile 'com.google.code.gson:gson:2.7'
+
 }

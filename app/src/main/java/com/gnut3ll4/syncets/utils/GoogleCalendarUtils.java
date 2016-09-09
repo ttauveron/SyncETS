@@ -16,10 +16,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import rx.Observable;
 
@@ -92,6 +90,7 @@ public class GoogleCalendarUtils {
                         event.setSummary(joursRemplaces.description);
 
                         Date dateStart = joursRemplacesFormatter.parse(joursRemplaces.dateOrigine);
+                        //TODO timezone offset
                         EventDateTime eventDateTime = new EventDateTime().setDateTime(new com.google.api.client.util.DateTime(dateStart));
 
                         event.setStart(eventDateTime);
@@ -146,13 +145,10 @@ public class GoogleCalendarUtils {
                     event.setSummary(seance.descriptionActivite.equals("Examen final") ? "Examen final " + seance.coursGroupe : seance.coursGroupe);
                     event.setLocation(seance.local);
 
-                    TimeZone mTimeZone = new GregorianCalendar().getTimeZone();
-                    int mGMTOffset = mTimeZone.getRawOffset();
-
                     EventDateTime eventStartDateTime = new EventDateTime();
-                    eventStartDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateDebut.getTime() - mGMTOffset));
+                    eventStartDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateDebut.getTime() - Utils.getTimeZoneOffset()));
                     EventDateTime eventEndDateTime = new EventDateTime();
-                    eventEndDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateFin.getTime() - mGMTOffset));
+                    eventEndDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateFin.getTime() - Utils.getTimeZoneOffset()));
 
                     event.setStart(eventStartDateTime);
                     event.setEnd(eventEndDateTime);

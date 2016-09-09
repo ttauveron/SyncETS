@@ -5,28 +5,24 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
-
-import com.gnut3ll4.signetswebservices.soap.SignetsMobileSoap;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.model.GoogleEventWrapper;
 import com.gnut3ll4.syncets.ui.LoginActivity;
 import com.gnut3ll4.syncets.utils.Constants;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
+import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.tasks.Tasks;
 import com.securepreferences.SecurePreferences;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import rx.Observable;
 import rx.Observer;
@@ -39,6 +35,7 @@ import rx.schedulers.Schedulers;
 public class BackgroundService extends WakefulIntentService {
 
     String calendarId;
+    String tasklistId;
 
     public BackgroundService() {
         super("BackgroundService");
@@ -49,10 +46,8 @@ public class BackgroundService extends WakefulIntentService {
      */
     @Override
     public void doWakefulWork(Intent intent) {
-        Log.e("TEST", "BACKGROUND TASK EXECUTING.......");
+        Log.d("SYNCETS", "Started syncing");
 
-
-        Calendar client;
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         GoogleAccountCredential credential;
@@ -62,11 +57,57 @@ public class BackgroundService extends WakefulIntentService {
 
         credential = LoginActivity.mCredential;
 
-        client = new Calendar.Builder(transport, jsonFactory, credential)
+        Calendar client = new Calendar.Builder(transport, jsonFactory, credential)
                 .setApplicationName("SyncETS")
                 .build();
 
-        SignetsMobileSoap signetsMobileSoap = new SignetsMobileSoap();
+
+        Tasks taskClient = new Tasks.Builder(
+                transport, jsonFactory, credential)
+                .setApplicationName("SyncETS")
+                .build();
+
+
+        //Checking if tasklist exists and create it if not
+        if (!selectedAccount.isEmpty()) {
+            try {
+                tasklistId = GoogleTaskUtils.createETSTaskListId(taskClient,
+                        getResources().getString(R.string.ets_tasklist));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        //Sync Moodle Assignment in Google Task
+        GoogleTaskUtils.getMoodleAssignmentsTaskEvents()
+                .flatMap(task -> {
+                    try {
+                        taskClient.tasks().insert(tasklistId, task).execute();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Object>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("SYNCETS", "Moodle sync ended");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+
+                    }
+                });
+
 
         //Checking if calendar exists and create it if not
         if (!selectedAccount.isEmpty()) {
@@ -82,14 +123,6 @@ public class BackgroundService extends WakefulIntentService {
                 e.printStackTrace();
             }
         }
-
-        //Inserting JoursRemplaces in local calendar
-
-        //Inserting Seances in local calendar
-        SimpleDateFormat seancesFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.CANADA_FRENCH);
-
-
-        ArrayList<Event> events = new ArrayList<>();
 
         //Getting JoursRemplaces from Signets
         Observable<Event> eventJoursRemplacesObservable = GoogleCalendarUtils.getJoursRemplaces();
@@ -123,7 +156,7 @@ public class BackgroundService extends WakefulIntentService {
                 .subscribe(new Observer<Object>() {
                     @Override
                     public void onCompleted() {
-                        Log.d("SYNC", "SYNC COMPLETED");
+                        Log.d("SYNCETS", "Signets sync ended");
                     }
 
                     @Override
