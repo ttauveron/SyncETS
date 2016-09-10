@@ -1,25 +1,41 @@
 package com.gnut3ll4.syncets.utils;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.gnut3ll4.signetswebservices.soap.SignetsMobileSoap;
 import com.gnut3ll4.syncets.ApplicationManager;
+import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.model.GoogleEventWrapper;
+import com.gnut3ll4.syncets.ui.LoginActivity;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.google.common.io.BaseEncoding;
+import com.securepreferences.SecurePreferences;
 
 import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class GoogleCalendarUtils {
 
@@ -103,7 +119,7 @@ public class GoogleCalendarUtils {
                 });
     }
 
-    public static Observable<Event> getSeances() {
+    public static Observable<Event> getSeances(boolean notificationsActivated) {
         return Observable.just(signetsMobileSoap)
                 .flatMap(signetsMobileSoap1 -> {
                     try {
@@ -156,17 +172,16 @@ public class GoogleCalendarUtils {
 //                    SharedPreferences defaultSharedPreferences = PreferenceManager
 //                            .getDefaultSharedPreferences(this);
                     //TODO enable notifications
-//                                boolean activateNotifications = defaultSharedPreferences
-//                                        .getBoolean(getString(R.string.preference_key), true);
-//                                if (activateNotifications) {
-//                                    EventReminder[] reminderOverrides = new EventReminder[] {
-//                                            new EventReminder().setMethod("popup").setMinutes(30),
-//                                    };
-//                                    Event.Reminders reminders = new Event.Reminders()
-//                                            .setUseDefault(false)
-//                                            .setOverrides(Arrays.asList(reminderOverrides));
-//                                    event.setReminders(reminders);
-//                                }
+
+                    if (notificationsActivated) {
+                        EventReminder[] reminderOverrides = new EventReminder[]{
+                                new EventReminder().setMethod("popup").setMinutes(15),
+                        };
+                        Event.Reminders reminders = new Event.Reminders()
+                                .setUseDefault(false)
+                                .setOverrides(Arrays.asList(reminderOverrides));
+                        event.setReminders(reminders);
+                    }
 
                     return Observable.just(event);
                 });
@@ -207,6 +222,87 @@ public class GoogleCalendarUtils {
                     return null;
 
                 });
+    }
+
+    private static String calendarId;
+
+    public static void syncCalendar(Context context, boolean notificationsActivated) throws IOException {
+        HttpTransport transport = AndroidHttp.newCompatibleTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+        GoogleAccountCredential credential;
+        SecurePreferences securePreferences = new SecurePreferences(context);
+
+        String selectedAccount = securePreferences.getString(Constants.SELECTED_ACCOUNT, "");
+
+        credential = LoginActivity.mCredential;
+
+        Calendar client = new Calendar.Builder(transport, jsonFactory, credential)
+                .setApplicationName("SyncETS")
+                .build();
+
+        //Checking if calendar exists and create it if not
+
+        if (selectedAccount.isEmpty()) {
+            Log.e("ERROR", "Selected account is empty");
+            return;
+        }
+
+        calendarId = securePreferences.getString(Constants.CALENDAR_ID, "");
+        if (calendarId.isEmpty()) {
+            calendarId = GoogleCalendarUtils.getETSCalendarId(
+                    client,
+                    context.getResources().getString(R.string.ets_calendar));
+            securePreferences.edit().putString(Constants.CALENDAR_ID, calendarId).commit();
+        }
+
+
+        //Getting JoursRemplaces from Signets
+        Observable<Event> eventJoursRemplacesObservable = GoogleCalendarUtils.getJoursRemplaces();
+
+        //Getting Seances from Signets
+        Observable<Event> eventSeancesObservable = GoogleCalendarUtils.getSeances(notificationsActivated);
+
+        //Merging list of calendar events (JoursRemplaces + Seances)
+        Observable<List<GoogleEventWrapper>> remoteEventsSignets =
+                Observable.merge(eventJoursRemplacesObservable, eventSeancesObservable)
+                        .flatMap(event -> Observable.just(new GoogleEventWrapper(event)))
+                        .toList();
+
+        //Getting already created events in Google calendar
+        Observable<List<GoogleEventWrapper>> localEventsGoogle = Observable.just(client.events())
+                .flatMap(events1 -> {
+                    try {
+                        return Observable.from(events1.list(calendarId).execute().getItems());
+                    } catch (IOException e) {
+                        return Observable.error(e);
+                    }
+                })
+                .flatMap(event1 -> Observable.just(new GoogleEventWrapper(event1)))
+                .toList();
+
+
+        //Syncing between Google calendar and Signets (updating Google calendar)
+        GoogleCalendarUtils.syncGoogleCalendar(localEventsGoogle, remoteEventsSignets, client, calendarId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Object>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("SYNCETS", "Signets sync ended");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+
+                    }
+                });
+
+
     }
 }
 

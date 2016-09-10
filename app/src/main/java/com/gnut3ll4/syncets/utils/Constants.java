@@ -26,4 +26,5 @@ public class Constants {
     public static final String SELECTED_ACCOUNT = "SELECTED_ACCOUNT";
     public static final int REQUEST_ACCOUNT_PICKER = 2;
     public static final String FIRST_LOGIN = "FIRST_LOGIN";
+    public static final boolean DEBUG_UPDATE_CHECK_SERVICE = false;
 }

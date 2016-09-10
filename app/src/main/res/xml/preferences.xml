@@ -25,10 +25,11 @@
             android:key="pref_notif_courses"
             android:summary="@string/notif_courses_summary"
             android:title="@string/notif_courses_title" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="pref_notif_moodle"
-            android:summary="@string/notif_moodle_summary"
-            android:title="@string/notif_moodle_title" />
+
+        <!--<SwitchPreference-->
+            <!--android:defaultValue="true"-->
+            <!--android:key="pref_notif_moodle"-->
+            <!--android:summary="@string/notif_moodle_summary"-->
+            <!--android:title="@string/notif_moodle_title" />-->
     </PreferenceCategory>
 </PreferenceScreen>

@@ -7,35 +7,40 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
+import com.gnut3ll4.syncets.utils.Constants;
 
 import java.util.Calendar;
+import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Created by gnut3ll4 on 26/03/16.
- */
 public class DailyListener implements WakefulIntentService.AlarmListener {
     public void scheduleAlarms(AlarmManager mgr, PendingIntent pi, Context context) {
         // register when enabled in preferences
 //        if (PreferenceHelper.getUpdateCheckDaily(context)) {
         Log.i("DailyListener", "Schedule update check...");
 
-        // every day at 9 am
         Calendar calendar = Calendar.getInstance();
-        // if it's after or equal 9 am schedule for next day
-//        if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 9) {
-//            calendar.add(Calendar.DAY_OF_YEAR, 1); // add, not set!
-//        }
-//        calendar.set(Calendar.HOUR_OF_DAY, 9);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
+        // schedule for next day between 10am to 2pm
+        int hour = ThreadLocalRandom.current().nextInt(10, 14 + 1);
+        int minutes = ThreadLocalRandom.current().nextInt(1, 59 + 1);
+        calendar.add(Calendar.DAY_OF_YEAR, 1); // add, not set!
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
 
-        mgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_HOUR * 4, pi);
-//                AlarmManager.INTERVAL_DAY, pi);
-//        }
+        if (Constants.DEBUG_UPDATE_CHECK_SERVICE) {
+            // for debugging execute service ever 2 minutes
+            mgr.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(),
+                    2 * 60 * 1000, pi);
+        } else {
+            mgr.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY, pi);
+        }
+
     }
 
     public void sendWakefulWork(Context context) {

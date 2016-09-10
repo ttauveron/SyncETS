@@ -3,7 +3,6 @@ package com.gnut3ll4.syncets.ui;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,10 +10,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.gnut3ll4.syncets.ApplicationManager;
 import com.gnut3ll4.syncets.R;
-import com.gnut3ll4.syncets.service.DailyListener;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -27,7 +24,7 @@ public class SettingsActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getFragmentManager().beginTransaction().replace(R.id.flContent, new MyPreferenceFragment()).commit();
+        getFragmentManager().beginTransaction().replace(R.id.flContent, new PreferenceSyncFragment()).commit();
     }
 
     @Override
@@ -36,13 +33,14 @@ public class SettingsActivity extends AppCompatActivity {
         if (ApplicationManager.userCredentials == null) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivityForResult(intent, 0);
+            finish();
         }
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater=getMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -55,8 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
                         .setIcon(R.drawable.ic_exit_to_app_black_48dp)
                         .setTitle(R.string.logout)
                         .setMessage(R.string.confirm_logout)
-                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener()
-                        {
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ApplicationManager.logout(SettingsActivity.this);
@@ -72,12 +69,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    public static class MyPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(final Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.preferences);
-        }
-    }
+
 
 }

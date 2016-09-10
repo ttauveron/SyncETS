@@ -1,14 +1,25 @@
 package com.gnut3ll4.syncets.utils;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.gnut3ll4.syncets.ApplicationManager;
+import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.model.MoodleAssignment;
 import com.gnut3ll4.syncets.model.MoodleCourse;
+import com.gnut3ll4.syncets.ui.LoginActivity;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
 import com.google.common.io.BaseEncoding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.securepreferences.SecurePreferences;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 
@@ -22,6 +33,9 @@ import java.util.List;
 import java.util.TimeZone;
 
 import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class GoogleTaskUtils {
 
@@ -183,6 +197,62 @@ public class GoogleTaskUtils {
         taskListId = tasksClient.tasklists().insert(taskList).execute().getId();
 
         return taskListId;
+    }
+
+    private static String tasklistId;
+
+    public static void syncMoodleAssignments(Context context) throws IOException {
+
+        HttpTransport transport = AndroidHttp.newCompatibleTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+        GoogleAccountCredential credential;
+        SecurePreferences securePreferences = new SecurePreferences(context);
+
+        String selectedAccount = securePreferences.getString(Constants.SELECTED_ACCOUNT, "");
+
+        credential = LoginActivity.mCredential;
+
+        Tasks taskClient = new Tasks.Builder(
+                transport, jsonFactory, credential)
+                .setApplicationName("SyncETS")
+                .build();
+
+        //Checking if tasklist exists and create it if not
+        if (!selectedAccount.isEmpty()) {
+            tasklistId = GoogleTaskUtils.createETSTaskListId(taskClient,
+                    context.getResources().getString(R.string.ets_tasklist));
+
+        }
+
+
+        //Sync Moodle Assignment in Google Task
+        GoogleTaskUtils.getMoodleAssignmentsTaskEvents()
+                .flatMap(task -> {
+                    try {
+                        taskClient.tasks().insert(tasklistId, task).execute();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Object>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("SYNCETS", "Moodle sync ended");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(Object o) {
+
+                    }
+                });
     }
 
 }

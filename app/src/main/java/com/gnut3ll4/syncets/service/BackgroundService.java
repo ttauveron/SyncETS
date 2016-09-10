@@ -2,6 +2,8 @@ package com.gnut3ll4.syncets.service;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
@@ -35,7 +37,7 @@ import rx.schedulers.Schedulers;
 public class BackgroundService extends WakefulIntentService {
 
     String calendarId;
-    String tasklistId;
+
 
     public BackgroundService() {
         super("BackgroundService");
@@ -48,127 +50,20 @@ public class BackgroundService extends WakefulIntentService {
     public void doWakefulWork(Intent intent) {
         Log.d("SYNCETS", "Started syncing");
 
-        HttpTransport transport = AndroidHttp.newCompatibleTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        GoogleAccountCredential credential;
-        SecurePreferences securePreferences = new SecurePreferences(this);
 
-        String selectedAccount = securePreferences.getString(Constants.SELECTED_ACCOUNT, "");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean pref_sync_courses = prefs.getBoolean("pref_sync_courses", true);
+        boolean pref_sync_moodle = prefs.getBoolean("pref_sync_moodle", true);
+        boolean pref_notif_courses = prefs.getBoolean("pref_notif_courses", true);
 
-        credential = LoginActivity.mCredential;
-
-        Calendar client = new Calendar.Builder(transport, jsonFactory, credential)
-                .setApplicationName("SyncETS")
-                .build();
-
-
-        Tasks taskClient = new Tasks.Builder(
-                transport, jsonFactory, credential)
-                .setApplicationName("SyncETS")
-                .build();
-
-
-        //Checking if tasklist exists and create it if not
-        if (!selectedAccount.isEmpty()) {
-            try {
-                tasklistId = GoogleTaskUtils.createETSTaskListId(taskClient,
-                        getResources().getString(R.string.ets_tasklist));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            if(pref_sync_courses)
+                GoogleCalendarUtils.syncCalendar(this, pref_notif_courses);
+            if(pref_sync_moodle)
+                GoogleTaskUtils.syncMoodleAssignments(this);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-
-        //Sync Moodle Assignment in Google Task
-        GoogleTaskUtils.getMoodleAssignmentsTaskEvents()
-                .flatMap(task -> {
-                    try {
-                        taskClient.tasks().insert(tasklistId, task).execute();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Object>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("SYNCETS", "Moodle sync ended");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Object o) {
-
-                    }
-                });
-
-
-        //Checking if calendar exists and create it if not
-        if (!selectedAccount.isEmpty()) {
-            calendarId = securePreferences.getString(Constants.CALENDAR_ID, "");
-            try {
-                if (calendarId.isEmpty()) {
-                    calendarId = GoogleCalendarUtils.getETSCalendarId(
-                            client,
-                            getResources().getString(R.string.ets_calendar));
-                    securePreferences.edit().putString(Constants.CALENDAR_ID, calendarId).commit();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        //Getting JoursRemplaces from Signets
-        Observable<Event> eventJoursRemplacesObservable = GoogleCalendarUtils.getJoursRemplaces();
-
-        //Getting Seances from Signets
-        Observable<Event> eventSeancesObservable = GoogleCalendarUtils.getSeances();
-
-        //Merging list of calendar events (JoursRemplaces + Seances)
-        Observable<List<GoogleEventWrapper>> remoteEventsSignets =
-                Observable.merge(eventJoursRemplacesObservable, eventSeancesObservable)
-                        .flatMap(event -> Observable.just(new GoogleEventWrapper(event)))
-                        .toList();
-
-        //Getting already created events in Google calendar
-        Observable<List<GoogleEventWrapper>> localEventsGoogle = Observable.just(client.events())
-                .flatMap(events1 -> {
-                    try {
-                        return Observable.from(events1.list(calendarId).execute().getItems());
-                    } catch (IOException e) {
-                        return Observable.error(e);
-                    }
-                })
-                .flatMap(event1 -> Observable.just(new GoogleEventWrapper(event1)))
-                .toList();
-
-
-        //Syncing between Google calendar and Signets (updating Google calendar)
-        GoogleCalendarUtils.syncGoogleCalendar(localEventsGoogle, remoteEventsSignets, client, calendarId)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Object>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("SYNCETS", "Signets sync ended");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onNext(Object o) {
-
-                    }
-                });
 
 
     }
