@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <Preference
-        android:key="pref_static_field_key"
-        android:selectable="false"
-        android:persistent="false"
-        android:summary="This app runs a sync every 4 hours"/>
+
+        <Preference
+            android:key="pref_static_field_key"
+            android:persistent="false"
+            android:selectable="false"
+            android:title="Last sync"
+            android:summary="" />
+
 
     <PreferenceCategory android:title="@string/synchronization">
         <SwitchPreference
@@ -25,11 +28,5 @@
             android:key="pref_notif_courses"
             android:summary="@string/notif_courses_summary"
             android:title="@string/notif_courses_title" />
-
-        <!--<SwitchPreference-->
-            <!--android:defaultValue="true"-->
-            <!--android:key="pref_notif_moodle"-->
-            <!--android:summary="@string/notif_moodle_summary"-->
-            <!--android:title="@string/notif_moodle_title" />-->
     </PreferenceCategory>
 </PreferenceScreen>

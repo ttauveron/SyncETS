@@ -1,22 +1,27 @@
 package com.gnut3ll4.syncets.ui;
 
+import android.app.Dialog;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
 import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
 
 import java.io.IOException;
+
+import mehdi.sakout.fancybuttons.FancyButton;
 
 public class PreferenceSyncFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -27,6 +32,25 @@ public class PreferenceSyncFragment extends PreferenceFragment
 //        setContentView(R.layout.fragment_main);
         PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .registerOnSharedPreferenceChangeListener(this);
+
+        onCoachMark();
+    }
+
+    public void onCoachMark(){
+
+        final Dialog dialog = new Dialog(getActivity(), R.style.WalkthroughTheme);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        dialog.setContentView(R.layout.coach_mark);
+        dialog.setCanceledOnTouchOutside(true);
+        //for dismissing anywhere you touch
+        View masterView = dialog.findViewById(R.id.coach_mark_master_view);
+        View button = dialog.findViewById(R.id.btn_sync_overlay);
+        button.setEnabled(false);
+        View.OnClickListener dismissOnClick = view -> dialog.dismiss();
+        masterView.setOnClickListener(dismissOnClick);
+        button.setOnClickListener(dismissOnClick);
+        dialog.show();
     }
 
     @Override
@@ -34,14 +58,23 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
         View view = inflater.inflate(R.layout.fragment_main, null);
 
-        Button test = (Button) view.findViewById(R.id.btn_test);
-        test.setOnClickListener(new View.OnClickListener() {
+
+        Preference pref = findPreference("pref_static_field_key");
+        String summary = (String) pref.getSummary();
+
+        //Update the summary with user input data
+        pref.setSummary("10/10/2010 14h34");
+
+        FancyButton syncButton = (FancyButton) view.findViewById(R.id.btn_sync);
+
+        syncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new AsyncTask<Void, Void, Void>() {
                     protected void onPreExecute() {
                         Log.d("SYNC", "Sync started");
                     }
+
                     protected Void doInBackground(Void... unused) {
                         try {
                             GoogleCalendarUtils.syncCalendar(getActivity(), true);
@@ -51,6 +84,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
                         }
                         return null;
                     }
+
                     protected void onPostExecute(Void unused) {
                         Log.d("SYNC", "Sync ended");
                     }

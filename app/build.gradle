@@ -73,5 +73,5 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.6'
 
     compile 'com.google.code.gson:gson:2.7'
-
+    compile 'com.github.medyo:fancybuttons:1.8.1'
 }

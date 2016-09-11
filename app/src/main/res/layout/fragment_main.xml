@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_test"
+    <mehdi.sakout.fancybuttons.FancyButton
+        android:id="@+id/btn_sync"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="This is a button on top of all preferences." />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        fancy:fb_borderColor="#FFFFFF"
+        fancy:fb_borderWidth="2dp"
+        fancy:fb_defaultColor="@color/colorPrimaryDark"
+        fancy:fb_focusColor="#8cc9f8"
+        fancy:fb_fontIconResource="&#xf021;"
+        fancy:fb_fontIconSize="25sp"
+        fancy:fb_iconPosition="top"
+        fancy:fb_radius="10dp"
+        fancy:fb_text="Run the sync"
+        fancy:fb_textColor="#FFFFFF" />
 
     <ListView
         android:id="@android:id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>

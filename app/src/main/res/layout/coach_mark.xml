@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coach_mark_master_view"
+    style="@style/WalkthroughTheme"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#B3000000"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/abc_action_bar_default_height_material"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:visibility="invisible"></android.support.v7.widget.Toolbar>
+
+    <mehdi.sakout.fancybuttons.FancyButton
+        android:id="@+id/btn_sync_overlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        fancy:fb_borderColor="#FFFFFF"
+        fancy:fb_borderWidth="2dp"
+        fancy:fb_defaultColor="@color/colorPrimaryDark"
+        fancy:fb_focusColor="#8cc9f8"
+        fancy:fb_fontIconResource="&#xf021;"
+        fancy:fb_fontIconSize="25sp"
+        fancy:fb_iconPosition="top"
+        fancy:fb_radius="10dp"
+        fancy:fb_text="Run the sync"
+        fancy:fb_textColor="#FFFFFF" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:paddingTop="5dp"
+        android:text="This app runs a synchronization every day between 10am and 2pm."
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:paddingTop="5dp"
+
+        android:text="Only 1 sync/day can be run."
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:paddingTop="5dp"
+
+        android:text="Click the above button to start your first sync."
+        android:textColor="#FFFFFF" />
+
+
+</LinearLayout>
