@@ -3,7 +3,6 @@ package com.gnut3ll4.syncets.ui;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -13,16 +12,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
 import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
 
-import java.io.IOException;
-
 import mehdi.sakout.fancybuttons.FancyButton;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class PreferenceSyncFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -37,7 +36,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
         onCoachMark();
     }
 
-    public void onCoachMark(){
+    public void onCoachMark() {
 
         final Dialog dialog = new Dialog(getActivity(), R.style.WalkthroughTheme);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -67,37 +66,60 @@ public class PreferenceSyncFragment extends PreferenceFragment
         FancyButton syncButton = (FancyButton) view.findViewById(R.id.btn_sync);
         CircularProgressView circularProgressView = (CircularProgressView) view.findViewById(R.id.progress_view);
 
-        syncButton.setOnClickListener(view1 -> new AsyncTask<Void, Void, Void>() {
-            protected void onPreExecute() {
-                Log.d("SYNC", "Sync started");
-                syncButton.setVisibility(View.INVISIBLE);
-                circularProgressView.setVisibility(View.VISIBLE);
-            }
+        syncButton.setOnClickListener(view1 -> {
 
-            protected Void doInBackground(Void... unused) {
-//                try {
-////                    GoogleCalendarUtils.syncCalendar(getActivity(), true);
-////                    GoogleTaskUtils.syncMoodleAssignments(getActivity());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    //TODO add preference check
+                    rx.Observable.create(subscriber -> {
+                        getSyncObservable().subscribe(new Observer<Object>() {
+                            @Override
+                            public void onCompleted() {
+                                subscriber.onCompleted();
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                subscriber.onError(e);
+                            }
+
+                            @Override
+                            public void onNext(Object o) {
+
+                            }
+                        });
+                    })
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Observer<Object>() {
+                                @Override
+                                public void onCompleted() {
+                                    Log.d("SYNCETS", "UI sync ended");
+                                    circularProgressView.setVisibility(View.GONE);
+//                                    syncButton.setVisibility(View.GONE);
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    e.printStackTrace();
+                                }
+
+                                @Override
+                                public void onNext(Object o) {
+
+                                }
+                            });
                 }
-                return null;
-            }
 
-            protected void onPostExecute(Void unused) {
-                Log.d("SYNC", "Sync ended");
-                circularProgressView.setVisibility(View.GONE);
-                syncButton.setVisibility(View.GONE);
-            }
-        }.execute());
+        );
+
 
         return view;
 
+    }
+
+    public rx.Observable<Object> getSyncObservable() {
+        rx.Observable<Object> syncCalendarEnded = GoogleCalendarUtils.syncCalendar(getActivity(), true);
+        rx.Observable<Object> syncMoodleEnded = GoogleTaskUtils.syncMoodleAssignments(getActivity());
+        return rx.Observable.zip(syncCalendarEnded, syncMoodleEnded, (o, o2) -> rx.Observable.empty());
     }
 
     @Override

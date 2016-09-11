@@ -33,9 +33,6 @@ import java.util.List;
 import java.util.Locale;
 
 import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class GoogleCalendarUtils {
 
@@ -187,7 +184,7 @@ public class GoogleCalendarUtils {
                 });
     }
 
-    public static Observable<Observable<Object>> syncGoogleCalendar(
+    public static Observable<Object> syncGoogleCalendar(
             Observable<List<GoogleEventWrapper>> localEventsGoogle,
             Observable<List<GoogleEventWrapper>> remoteEventsSignets,
             Calendar calendarService,
@@ -219,14 +216,14 @@ public class GoogleCalendarUtils {
                     } catch (IOException e) {
                         return Observable.error(e);
                     }
-                    return null;
+                    return Observable.empty();
 
                 });
     }
 
     private static String calendarId;
 
-    public static void syncCalendar(Context context, boolean notificationsActivated) throws IOException {
+    public static Observable<Object> syncCalendar(Context context, boolean notificationsActivated) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         GoogleAccountCredential credential;
@@ -244,14 +241,18 @@ public class GoogleCalendarUtils {
 
         if (selectedAccount.isEmpty()) {
             Log.e("ERROR", "Selected account is empty");
-            return;
+            return Observable.error(new Exception("Selected account is empty"));
         }
 
         calendarId = securePreferences.getString(Constants.CALENDAR_ID, "");
         if (calendarId.isEmpty()) {
-            calendarId = GoogleCalendarUtils.getETSCalendarId(
-                    client,
-                    context.getResources().getString(R.string.ets_calendar));
+            try {
+                calendarId = GoogleCalendarUtils.getETSCalendarId(
+                        client,
+                        context.getResources().getString(R.string.ets_calendar));
+            } catch (IOException e) {
+                return Observable.error(e);
+            }
             securePreferences.edit().putString(Constants.CALENDAR_ID, calendarId).commit();
         }
 
@@ -282,26 +283,11 @@ public class GoogleCalendarUtils {
 
 
         //Syncing between Google calendar and Signets (updating Google calendar)
-        GoogleCalendarUtils.syncGoogleCalendar(localEventsGoogle, remoteEventsSignets, client, calendarId)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Object>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("SYNCETS", "Signets sync ended");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onNext(Object o) {
-
-                    }
-                });
-
+        return GoogleCalendarUtils.syncGoogleCalendar(
+                localEventsGoogle,
+                remoteEventsSignets,
+                client,
+                calendarId);
 
     }
 }

@@ -1,7 +1,6 @@
 package com.gnut3ll4.syncets.utils;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.gnut3ll4.syncets.ApplicationManager;
 import com.gnut3ll4.syncets.R;
@@ -24,6 +23,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -33,9 +33,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class GoogleTaskUtils {
 
@@ -147,7 +144,9 @@ public class GoogleTaskUtils {
 
 
                             return Observable.from(moodleAssignments);
-                        } catch (Exception e) {
+                        } catch (JSONException e) {
+                            return Observable.empty();
+                        } catch (IOException e) {
                             return Observable.error(e);
                         }
                     })
@@ -201,7 +200,7 @@ public class GoogleTaskUtils {
 
     private static String tasklistId;
 
-    public static void syncMoodleAssignments(Context context) throws IOException {
+    public static Observable<Object> syncMoodleAssignments(Context context) {
 
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -219,40 +218,46 @@ public class GoogleTaskUtils {
 
         //Checking if tasklist exists and create it if not
         if (!selectedAccount.isEmpty()) {
-            tasklistId = GoogleTaskUtils.createETSTaskListId(taskClient,
-                    context.getResources().getString(R.string.ets_tasklist));
+            try {
+                tasklistId = GoogleTaskUtils.createETSTaskListId(taskClient,
+                        context.getResources().getString(R.string.ets_tasklist));
+            } catch (IOException e) {
+                Observable.error(e);
+            }
 
         }
 
 
         //Sync Moodle Assignment in Google Task
-        GoogleTaskUtils.getMoodleAssignmentsTaskEvents()
+        return GoogleTaskUtils.getMoodleAssignmentsTaskEvents()
                 .flatMap(task -> {
                     try {
                         taskClient.tasks().insert(tasklistId, task).execute();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        return Observable.error(e);
                     }
-                    return null;
-                })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Object>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("SYNCETS", "Moodle sync ended");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Object o) {
-
-                    }
+                    return Observable.empty();
                 });
+
+
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<Object>() {
+//                    @Override
+//                    public void onCompleted() {
+//                        Log.d("SYNCETS", "Moodle sync ended");
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(Object o) {
+//
+//                    }
+//                });
     }
 
 }
