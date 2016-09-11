@@ -33,7 +33,7 @@ public class BackgroundService extends WakefulIntentService {
     public void doWakefulWork(Intent intent) {
         Log.d("SYNCETS", "Started syncing");
 
-
+//todo 1 sync by day
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean pref_sync_courses = prefs.getBoolean("pref_sync_courses", true);
         boolean pref_sync_moodle = prefs.getBoolean("pref_sync_moodle", true);

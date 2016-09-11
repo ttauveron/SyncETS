@@ -2,6 +2,7 @@ package com.gnut3ll4.syncets;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -10,7 +11,14 @@ import android.text.TextUtils;
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.gnut3ll4.syncets.model.UserCredentials;
 import com.gnut3ll4.syncets.ui.SettingsActivity;
+import com.gnut3ll4.syncets.utils.Constants;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.tasks.TasksScopes;
 import com.securepreferences.SecurePreferences;
+
+import java.util.Arrays;
 
 public class ApplicationManager extends Application {
 
@@ -27,6 +35,18 @@ public class ApplicationManager extends Application {
         if (!TextUtils.isEmpty(u) && !TextUtils.isEmpty(p)) {
             userCredentials = new UserCredentials(u, p);
         }
+    }
+
+    public static GoogleAccountCredential getGoogleCredentials(Context context) {
+        SecurePreferences securePreferences = new SecurePreferences(context);
+        String selectedAccount = securePreferences.getString(Constants.SELECTED_ACCOUNT, "");
+        final String[] SCOPES = { CalendarScopes.CALENDAR, TasksScopes.TASKS};
+        GoogleAccountCredential googleAccountCredential = GoogleAccountCredential.usingOAuth2(
+                context, Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff())
+                .setSelectedAccountName(selectedAccount);
+
+        return googleAccountCredential;
     }
 
     public static void logout(final Activity activity) {

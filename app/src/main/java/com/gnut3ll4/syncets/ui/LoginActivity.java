@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
-    public static GoogleAccountCredential mCredential;
+
 
     @Bind(R.id.input_email)
     EditText _emailText;
@@ -65,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
     private UserCredentials userCredentials;
     private SecurePreferences securePreferences;
 
-    private static final String[] SCOPES = { CalendarScopes.CALENDAR, TasksScopes.TASKS};
+    private static final String[] SCOPES = {CalendarScopes.CALENDAR, TasksScopes.TASKS};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,12 +75,9 @@ public class LoginActivity extends AppCompatActivity {
 
         securePreferences = new SecurePreferences(this);
 
-        mCredential = GoogleAccountCredential.usingOAuth2(
-                getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff());
-
-        GoogleAccountCredential.usingOAuth2(getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff());
+//        ApplicationManager.googleAccountCredential = GoogleAccountCredential.usingOAuth2(
+//                getApplicationContext(), Arrays.asList(SCOPES))
+//                .setBackOff(new ExponentialBackOff());
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
 
@@ -169,7 +166,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-        if(requestCode == 1616) {
+        if (requestCode == 1616) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -189,44 +186,32 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == REQUEST_SIGNUP) {
-//            if (resultCode == RESULT_OK) {
-//
-//                // TODO: Implement successful signup logic here
-//                // By default we just finish the Activity and log them in automatically
-//                this.finish();
-//            }
-//        }
-
 
         if (requestCode == Constants.REQUEST_CODE_EMAIL && resultCode == RESULT_OK) {
             String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
             securePreferences.edit().putString(Constants.SELECTED_ACCOUNT, accountName).commit();
+        }
 
-
+        if (requestCode == REQUEST_AUTHORIZATION) {
 
         }
 
-        if(requestCode == REQUEST_AUTHORIZATION) {
-
-        }
-
-        if ( requestCode == REQUEST_ACCOUNT_PICKER && resultCode == RESULT_OK && data != null &&
+        if (requestCode == REQUEST_ACCOUNT_PICKER && resultCode == RESULT_OK && data != null &&
                 data.getExtras() != null) {
             String accountName =
                     data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
             if (accountName != null) {
                 securePreferences.edit().putString(Constants.SELECTED_ACCOUNT, accountName).apply();
-                mCredential.setSelectedAccountName(accountName);
+                GoogleAccountCredential googleCredentials = ApplicationManager.getGoogleCredentials(this);
 
 
                 HttpTransport transport = AndroidHttp.newCompatibleTransport();
                 JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-                Calendar calendar = new Calendar.Builder(transport, jsonFactory, mCredential)
+                Calendar calendar = new Calendar.Builder(transport, jsonFactory, googleCredentials)
                         .setApplicationName("SyncETS")
                         .build();
                 Tasks taskClient = new Tasks.Builder(
-                        transport, jsonFactory, mCredential)
+                        transport, jsonFactory, googleCredentials)
                         .setApplicationName("SyncETS")
                         .build();
 
@@ -247,14 +232,12 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         return null;
                     }
+
                     protected void onPostExecute(String msg) {
                         // Post Code
                         // Use `msg` in code
                     }
                 }.execute();
-
-
-
 
 
             }
@@ -320,9 +303,13 @@ public class LoginActivity extends AppCompatActivity {
 //        if (EasyPermissions.hasPermissions(
 //                this, Manifest.permission.GET_ACCOUNTS)) {
 //                // Start a dialog from which the user can choose an account
-                startActivityForResult(
-                        mCredential.newChooseAccountIntent(),
-                        REQUEST_ACCOUNT_PICKER);
+        GoogleAccountCredential googleAccountCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
+
+        startActivityForResult(
+                googleAccountCredential.newChooseAccountIntent(),
+                REQUEST_ACCOUNT_PICKER);
 //        } else {
 //            // Request the GET_ACCOUNTS permission via a user dialog
 //            EasyPermissions.requestPermissions(

@@ -14,11 +14,14 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
+import com.google.api.services.tasks.TasksScopes;
 import com.google.common.io.BaseEncoding;
 import com.securepreferences.SecurePreferences;
 
@@ -116,6 +119,7 @@ public class GoogleCalendarUtils {
                 });
     }
 
+    //todo javadoc
     public static Observable<Event> getSeances(boolean notificationsActivated) {
         return Observable.just(signetsMobileSoap)
                 .flatMap(signetsMobileSoap1 -> {
@@ -155,6 +159,8 @@ public class GoogleCalendarUtils {
                             .toLowerCase()
                             .replace("=", "");
                     event.setId(encodedId);
+
+                    //todo add labo/tp/cours
                     event.setSummary(seance.descriptionActivite.equals("Examen final") ? "Examen final " + seance.coursGroupe : seance.coursGroupe);
                     event.setLocation(seance.local);
 
@@ -165,10 +171,6 @@ public class GoogleCalendarUtils {
 
                     event.setStart(eventStartDateTime);
                     event.setEnd(eventEndDateTime);
-
-//                    SharedPreferences defaultSharedPreferences = PreferenceManager
-//                            .getDefaultSharedPreferences(this);
-                    //TODO enable notifications
 
                     if (notificationsActivated) {
                         EventReminder[] reminderOverrides = new EventReminder[]{
@@ -226,24 +228,15 @@ public class GoogleCalendarUtils {
     public static Observable<Object> syncCalendar(Context context, boolean notificationsActivated) {
         HttpTransport transport = AndroidHttp.newCompatibleTransport();
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        GoogleAccountCredential credential;
+        GoogleAccountCredential credential = ApplicationManager.getGoogleCredentials(context);
+
         SecurePreferences securePreferences = new SecurePreferences(context);
-
-        String selectedAccount = securePreferences.getString(Constants.SELECTED_ACCOUNT, "");
-
-        credential = LoginActivity.mCredential;
 
         Calendar client = new Calendar.Builder(transport, jsonFactory, credential)
                 .setApplicationName("SyncETS")
                 .build();
 
         //Checking if calendar exists and create it if not
-
-        if (selectedAccount.isEmpty()) {
-            Log.e("ERROR", "Selected account is empty");
-            return Observable.error(new Exception("Selected account is empty"));
-        }
-
         calendarId = securePreferences.getString(Constants.CALENDAR_ID, "");
         if (calendarId.isEmpty()) {
             try {

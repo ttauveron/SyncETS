@@ -209,7 +209,7 @@ public class GoogleTaskUtils {
 
         String selectedAccount = securePreferences.getString(Constants.SELECTED_ACCOUNT, "");
 
-        credential = LoginActivity.mCredential;
+        credential = ApplicationManager.getGoogleCredentials(context);
 
         Tasks taskClient = new Tasks.Builder(
                 transport, jsonFactory, credential)

@@ -41,6 +41,8 @@ public class Utils {
     }
 
     public static long getTimeZoneOffset() {
+
+        //todo fix timezone
         TimeZone mTimeZone = new GregorianCalendar().getTimeZone();
         return mTimeZone.getRawOffset();
     }
