@@ -135,8 +135,6 @@ public class LoginActivity extends AppCompatActivity {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        // TODO: Implement your own authentication logic here.
-
         userCredentials = new UserCredentials(email, password);
 
         SignetsMobileSoap signetsMobileSoap = new SignetsMobileSoap(new IServiceEvents() {

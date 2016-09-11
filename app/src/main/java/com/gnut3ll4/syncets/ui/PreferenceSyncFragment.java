@@ -34,17 +34,22 @@ import rx.schedulers.Schedulers;
 
 public class PreferenceSyncFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    SecurePreferences securePreferences;
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
         PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .registerOnSharedPreferenceChangeListener(this);
+        securePreferences = new SecurePreferences(getActivity());
 
-        //todo last sync display
-
-        //todo if first login
-        onCoachMark();
+        boolean firstLogin = securePreferences.getBoolean(Constants.FIRST_LOGIN, true);
+        if (firstLogin) {
+            securePreferences.edit().putBoolean(Constants.FIRST_LOGIN, false).commit();
+            onCoachMark();
+        }
     }
 
     public void onCoachMark() {
@@ -71,6 +76,8 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
         View view = inflater.inflate(R.layout.fragment_main, null);
 
+        //todo last sync display
+
         Preference pref = findPreference("pref_static_field_key");
 
         //Update the summary with user input data
@@ -86,7 +93,6 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
                     //TODO add preference check
                     rx.Observable.create(subscriber -> {
-
 
 
                         getSyncObservable().subscribe(new Observer<Object>() {
