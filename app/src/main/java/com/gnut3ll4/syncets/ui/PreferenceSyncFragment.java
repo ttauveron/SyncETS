@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 
+import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
 import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
@@ -58,39 +59,42 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
         View view = inflater.inflate(R.layout.fragment_main, null);
 
-
         Preference pref = findPreference("pref_static_field_key");
-        String summary = (String) pref.getSummary();
 
         //Update the summary with user input data
-        pref.setSummary("10/10/2010 14h34");
+        pref.setSummary("Never");
 
         FancyButton syncButton = (FancyButton) view.findViewById(R.id.btn_sync);
+        CircularProgressView circularProgressView = (CircularProgressView) view.findViewById(R.id.progress_view);
 
-        syncButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new AsyncTask<Void, Void, Void>() {
-                    protected void onPreExecute() {
-                        Log.d("SYNC", "Sync started");
-                    }
-
-                    protected Void doInBackground(Void... unused) {
-                        try {
-                            GoogleCalendarUtils.syncCalendar(getActivity(), true);
-                            GoogleTaskUtils.syncMoodleAssignments(getActivity());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-
-                    protected void onPostExecute(Void unused) {
-                        Log.d("SYNC", "Sync ended");
-                    }
-                }.execute();
+        syncButton.setOnClickListener(view1 -> new AsyncTask<Void, Void, Void>() {
+            protected void onPreExecute() {
+                Log.d("SYNC", "Sync started");
+                syncButton.setVisibility(View.INVISIBLE);
+                circularProgressView.setVisibility(View.VISIBLE);
             }
-        });
+
+            protected Void doInBackground(Void... unused) {
+//                try {
+////                    GoogleCalendarUtils.syncCalendar(getActivity(), true);
+////                    GoogleTaskUtils.syncMoodleAssignments(getActivity());
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            protected void onPostExecute(Void unused) {
+                Log.d("SYNC", "Sync ended");
+                circularProgressView.setVisibility(View.GONE);
+                syncButton.setVisibility(View.GONE);
+            }
+        }.execute());
 
         return view;
 
