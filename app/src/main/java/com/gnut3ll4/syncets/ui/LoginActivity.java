@@ -72,7 +72,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-
+        //todo add progressbar while login
+        //todo locale string translate and remove hardcoded strings xml
         securePreferences = new SecurePreferences(this);
 
 //        ApplicationManager.googleAccountCredential = GoogleAccountCredential.usingOAuth2(

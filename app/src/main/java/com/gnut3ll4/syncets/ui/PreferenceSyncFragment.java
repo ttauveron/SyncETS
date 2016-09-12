@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.LinearLayout;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.gnut3ll4.syncets.R;
@@ -77,13 +78,14 @@ public class PreferenceSyncFragment extends PreferenceFragment
         updateLastSync();
 
         FancyButton syncButton = (FancyButton) view.findViewById(R.id.btn_sync);
-        CircularProgressView circularProgressView = (CircularProgressView) view.findViewById(R.id.progress_view);
+        LinearLayout linearLayoutProgress = (LinearLayout) view.findViewById(R.id.linearlayout_progress);
 
         boolean syncAvailableToday = Utils.isSyncAvailableToday(getActivity());
 
-        if(!syncAvailableToday) {
+        if (!syncAvailableToday) {
             syncButton.setEnabled(false);
             syncButton.setVisibility(View.GONE);
+            linearLayoutProgress.setVisibility(View.GONE);
         } else {
             syncButton.setEnabled(true);
             syncButton.setVisibility(View.VISIBLE);
@@ -91,8 +93,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
         syncButton.setOnClickListener(view1 -> {
 
-                    //todo display message like "this can take several minutes"
-                    circularProgressView.setVisibility(View.VISIBLE);
+                    linearLayoutProgress.setVisibility(View.VISIBLE);
                     syncButton.setVisibility(View.INVISIBLE);
 
                     //TODO add preference check
@@ -123,7 +124,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
                                 public void onCompleted() {
                                     Log.d("SYNCETS", "UI sync ended");
                                     //todo add animation translate here
-                                    circularProgressView.setVisibility(View.GONE);
+                                    linearLayoutProgress.setVisibility(View.GONE);
                                     syncButton.setVisibility(View.GONE);
                                     updateLastSync();
                                 }
@@ -131,7 +132,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
                                 @Override
                                 public void onError(Throwable e) {
                                     e.printStackTrace();
-                                    circularProgressView.setVisibility(View.GONE);
+                                    linearLayoutProgress.setVisibility(View.INVISIBLE);
                                     syncButton.setVisibility(View.VISIBLE);
                                 }
 

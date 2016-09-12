@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fancy="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
@@ -11,8 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        >
+        android:layout_marginTop="10dp">
 
         <mehdi.sakout.fancybuttons.FancyButton
             android:id="@+id/btn_sync"
@@ -31,14 +30,30 @@
             fancy:fb_text="Run the sync"
             fancy:fb_textColor="#FFFFFF" />
 
-        <com.github.rahatarmanahmed.cpv.CircularProgressView
-            android:id="@+id/progress_view"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:visibility="gone"
-            android:layout_centerInParent="true"
-            app:cpv_animAutostart="true"
-            app:cpv_indeterminate="true" />
+        <LinearLayout
+            android:id="@+id/linearlayout_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:orientation="vertical">
+
+            <com.github.rahatarmanahmed.cpv.CircularProgressView
+                android:id="@+id/progress_view"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center_horizontal"
+                app:cpv_animAutostart="true"
+                app:cpv_indeterminate="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/colorAccent"
+                android:text="This operation can take several minutes" />
+        </LinearLayout>
+
     </RelativeLayout>
 
 
