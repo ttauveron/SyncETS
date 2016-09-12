@@ -14,19 +14,13 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
-import com.gnut3ll4.syncets.ApplicationManager;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.utils.Constants;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
 import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
 import com.gnut3ll4.syncets.utils.Utils;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.tasks.TasksScopes;
 import com.securepreferences.SecurePreferences;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -58,8 +52,6 @@ public class PreferenceSyncFragment extends PreferenceFragment
     }
 
     public void onCoachMark() {
-
-        //todo add ok button
         final Dialog dialog = new Dialog(getActivity(), R.style.WalkthroughTheme);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -68,10 +60,12 @@ public class PreferenceSyncFragment extends PreferenceFragment
         //for dismissing anywhere you touch
         View masterView = dialog.findViewById(R.id.coach_mark_master_view);
         View button = dialog.findViewById(R.id.btn_sync_overlay);
+        View buttonOk = dialog.findViewById(R.id.btn_ok);
         button.setEnabled(false);
         View.OnClickListener dismissOnClick = view -> dialog.dismiss();
         masterView.setOnClickListener(dismissOnClick);
         button.setOnClickListener(dismissOnClick);
+        buttonOk.setOnClickListener(dismissOnClick);
         dialog.show();
         //todo E/WindowManager: android.view.WindowLeaked when logout
     }
@@ -163,14 +157,14 @@ public class PreferenceSyncFragment extends PreferenceFragment
         rx.Observable<Object> syncMoodleEnded = GoogleTaskUtils.syncMoodleAssignments(getActivity())
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread());
-        return Observable.merge(syncCalendarEnded,syncMoodleEnded)
-        .flatMap(o -> {
-            Utils.putDate(securePreferences,
-                    Constants.LAST_SYNC,
-                    new Date(),
-                    new GregorianCalendar().getTimeZone());
-            return Observable.empty();
-        });
+        return Observable.merge(syncCalendarEnded, syncMoodleEnded)
+                .flatMap(o -> {
+                    Utils.putDate(securePreferences,
+                            Constants.LAST_SYNC,
+                            new Date(),
+                            new GregorianCalendar().getTimeZone());
+                    return Observable.empty();
+                });
 
 //        Observable<Object> zip = Observable.zip(syncCalendarEnded, syncMoodleEnded, (o, o2) -> {
 //            Utils.putDate(securePreferences,
