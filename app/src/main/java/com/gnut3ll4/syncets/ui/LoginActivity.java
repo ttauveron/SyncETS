@@ -75,20 +75,11 @@ public class LoginActivity extends AppCompatActivity {
         //todo add progressbar while login
         //todo locale string translate and remove hardcoded strings xml
         //todo remove client secret file from git history
+        //todo improve ui login (image background for example)
+        //todo test with no internet connection
         securePreferences = new SecurePreferences(this);
 
-//        ApplicationManager.googleAccountCredential = GoogleAccountCredential.usingOAuth2(
-//                getApplicationContext(), Arrays.asList(SCOPES))
-//                .setBackOff(new ExponentialBackOff());
-
-        _loginButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
-
+        _loginButton.setOnClickListener(v -> login());
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,

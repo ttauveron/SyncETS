@@ -155,8 +155,9 @@ public class GoogleCalendarUtils {
                             .replace("=", "");
                     event.setId(encodedId);
 
-                    //todo add labo/tp/cours
-                    event.setSummary(seance.descriptionActivite.equals("Examen final") ? "Examen final " + seance.coursGroupe : seance.coursGroupe);
+                    event.setSummary(seance.descriptionActivite.equals("Examen final") ?
+                            "Examen final " + seance.coursGroupe :
+                            seance.coursGroupe + " - " + seance.nomActivite);
                     event.setLocation(seance.local);
 
                     EventDateTime eventStartDateTime = new EventDateTime();
