@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.gnut3ll4.syncets.utils.Constants;
@@ -39,13 +40,17 @@ public class BackgroundService extends WakefulIntentService {
     @Override
     public void doWakefulWork(Intent intent) {
         Log.d("SYNCETS", "Started syncing");
-
-//todo 1 sync by day
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SecurePreferences securePreferences = new SecurePreferences(this);
+
+        boolean syncAvailableToday = Utils.isSyncAvailableToday(this);
+        if(!syncAvailableToday) {
+            return;
+        }
+
         boolean pref_sync_courses = prefs.getBoolean("pref_sync_courses", true);
         boolean pref_sync_moodle = prefs.getBoolean("pref_sync_moodle", true);
         boolean pref_notif_courses = prefs.getBoolean("pref_notif_courses", true);
-        SecurePreferences securePreferences = new SecurePreferences(this);
 
         Observable<Object> syncCalendar = Observable.empty();
         Observable<Object> syncMoodleAssignments = Observable.empty();
@@ -53,25 +58,6 @@ public class BackgroundService extends WakefulIntentService {
         if (pref_sync_courses) {
             syncCalendar = GoogleCalendarUtils.syncCalendar(this, pref_notif_courses);
         }
-//                    .subscribeOn(Schedulers.newThread())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(new Observer<Object>() {
-//                        @Override
-//                        public void onCompleted() {
-//                            Log.d("SYNCETS", "Calendar sync ended");
-//                        }
-//
-//                        @Override
-//                        public void onError(Throwable e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        @Override
-//                        public void onNext(Object o) {
-//
-//                        }
-//                    });
-
         if (pref_sync_moodle) {
             syncMoodleAssignments = GoogleTaskUtils.syncMoodleAssignments(this);
         }

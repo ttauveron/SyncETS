@@ -1,5 +1,7 @@
 package com.gnut3ll4.syncets.utils;
 
+import android.content.Context;
+
 import com.securepreferences.SecurePreferences;
 
 import org.joda.time.DateTime;
@@ -64,5 +66,19 @@ public class Utils {
     public static void putDate(final SecurePreferences prefs, final String key, final Date date, final TimeZone zone) {
         prefs.edit().putLong(key + "_value", date.getTime()).apply();
         prefs.edit().putString(key + "_zone", zone.getID()).apply();
+    }
+
+    public static boolean isSyncAvailableToday(Context context) {
+        SecurePreferences securePreferences = new SecurePreferences(context);
+        DateTime today = new DateTime(new Date());
+
+        Date dateLastSync = getDate(securePreferences, Constants.LAST_SYNC, null);
+
+        if(dateLastSync==null){
+            return true;
+        }
+
+        DateTime datetimeLastSync = new DateTime(dateLastSync);
+        return datetimeLastSync.getDayOfYear() != today.getDayOfYear();
     }
 }

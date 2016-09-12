@@ -35,7 +35,7 @@
             android:id="@+id/progress_view"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_centerInParent="true"
             app:cpv_animAutostart="true"
             app:cpv_indeterminate="true" />

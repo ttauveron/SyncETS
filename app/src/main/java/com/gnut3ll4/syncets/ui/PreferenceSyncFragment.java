@@ -74,12 +74,20 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
         View view = inflater.inflate(R.layout.fragment_main, null);
 
-        //todo last sync display
         updateLastSync();
-
 
         FancyButton syncButton = (FancyButton) view.findViewById(R.id.btn_sync);
         CircularProgressView circularProgressView = (CircularProgressView) view.findViewById(R.id.progress_view);
+
+        boolean syncAvailableToday = Utils.isSyncAvailableToday(getActivity());
+
+        if(!syncAvailableToday) {
+            syncButton.setEnabled(false);
+            syncButton.setVisibility(View.GONE);
+        } else {
+            syncButton.setEnabled(true);
+            syncButton.setVisibility(View.VISIBLE);
+        }
 
         syncButton.setOnClickListener(view1 -> {
 
