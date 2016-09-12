@@ -1,7 +1,11 @@
 package com.gnut3ll4.syncets.utils;
 
+import com.securepreferences.SecurePreferences;
+
 import org.joda.time.DateTime;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -45,5 +49,20 @@ public class Utils {
         //todo fix timezone
         TimeZone mTimeZone = new GregorianCalendar().getTimeZone();
         return mTimeZone.getRawOffset();
+    }
+
+    public static Date getDate(final SecurePreferences prefs, final String key, final Date defValue) {
+        if (!prefs.contains(key + "_value") || !prefs.contains(key + "_zone")) {
+            return defValue;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(prefs.getLong(key + "_value", 0));
+        calendar.setTimeZone(TimeZone.getTimeZone(prefs.getString(key + "_zone", TimeZone.getDefault().getID())));
+        return calendar.getTime();
+    }
+
+    public static void putDate(final SecurePreferences prefs, final String key, final Date date, final TimeZone zone) {
+        prefs.edit().putLong(key + "_value", date.getTime()).apply();
+        prefs.edit().putString(key + "_zone", zone.getID()).apply();
     }
 }

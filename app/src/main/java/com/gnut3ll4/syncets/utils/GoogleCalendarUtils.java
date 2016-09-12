@@ -1,27 +1,22 @@
 package com.gnut3ll4.syncets.utils;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.gnut3ll4.signetswebservices.soap.SignetsMobileSoap;
 import com.gnut3ll4.syncets.ApplicationManager;
 import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.model.GoogleEventWrapper;
-import com.gnut3ll4.syncets.ui.LoginActivity;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.EventReminder;
-import com.google.api.services.tasks.TasksScopes;
 import com.google.common.io.BaseEncoding;
 import com.securepreferences.SecurePreferences;
 

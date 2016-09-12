@@ -19,6 +19,7 @@ import com.gnut3ll4.syncets.R;
 import com.gnut3ll4.syncets.utils.Constants;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
 import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
+import com.gnut3ll4.syncets.utils.Utils;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.calendar.CalendarScopes;
@@ -26,8 +27,11 @@ import com.google.api.services.tasks.TasksScopes;
 import com.securepreferences.SecurePreferences;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import mehdi.sakout.fancybuttons.FancyButton;
+import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -40,6 +44,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //todo block phone rotation
         addPreferencesFromResource(R.xml.preferences);
         PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .registerOnSharedPreferenceChangeListener(this);
@@ -77,17 +82,15 @@ public class PreferenceSyncFragment extends PreferenceFragment
         View view = inflater.inflate(R.layout.fragment_main, null);
 
         //todo last sync display
+        updateLastSync();
 
-        Preference pref = findPreference("pref_static_field_key");
-
-        //Update the summary with user input data
-        pref.setSummary("Never");
 
         FancyButton syncButton = (FancyButton) view.findViewById(R.id.btn_sync);
         CircularProgressView circularProgressView = (CircularProgressView) view.findViewById(R.id.progress_view);
 
         syncButton.setOnClickListener(view1 -> {
 
+                    //todo display message like "this can take several minutes"
                     circularProgressView.setVisibility(View.VISIBLE);
                     syncButton.setVisibility(View.INVISIBLE);
 
@@ -112,7 +115,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
                             }
                         });
                     })
-                            .subscribeOn(Schedulers.newThread())
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Observer<Object>() {
                                 @Override
@@ -121,6 +124,7 @@ public class PreferenceSyncFragment extends PreferenceFragment
                                     //todo add animation translate here
                                     circularProgressView.setVisibility(View.GONE);
                                     syncButton.setVisibility(View.GONE);
+                                    updateLastSync();
                                 }
 
                                 @Override
@@ -144,12 +148,39 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
     }
 
+    public void updateLastSync() {
+        Preference pref = findPreference("pref_static_field_key");
+        Date date = Utils.getDate(securePreferences, Constants.LAST_SYNC, null);
+        pref.setSummary(date == null ? "Never" : date.toString());
+    }
+
     public rx.Observable<Object> getSyncObservable() {
 
+        //todo choose boolean sync options
+        rx.Observable<Object> syncCalendarEnded = GoogleCalendarUtils.syncCalendar(getActivity(), true)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+        rx.Observable<Object> syncMoodleEnded = GoogleTaskUtils.syncMoodleAssignments(getActivity())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+        return Observable.merge(syncCalendarEnded,syncMoodleEnded)
+        .flatMap(o -> {
+            Utils.putDate(securePreferences,
+                    Constants.LAST_SYNC,
+                    new Date(),
+                    new GregorianCalendar().getTimeZone());
+            return Observable.empty();
+        });
 
-        rx.Observable<Object> syncCalendarEnded = GoogleCalendarUtils.syncCalendar(getActivity(), true);
-        rx.Observable<Object> syncMoodleEnded = GoogleTaskUtils.syncMoodleAssignments(getActivity());
-        return rx.Observable.zip(syncCalendarEnded, syncMoodleEnded, (o, o2) -> rx.Observable.empty());
+//        Observable<Object> zip = Observable.zip(syncCalendarEnded, syncMoodleEnded, (o, o2) -> {
+//            Utils.putDate(securePreferences,
+//                    Constants.LAST_SYNC,
+//                    new Date(),
+//                    new GregorianCalendar().getTimeZone());
+//            return Observable.empty();
+//        });
+//
+//        return zip;
     }
 
     @Override

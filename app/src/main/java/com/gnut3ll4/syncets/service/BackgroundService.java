@@ -7,9 +7,16 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
+import com.gnut3ll4.syncets.utils.Constants;
 import com.gnut3ll4.syncets.utils.GoogleCalendarUtils;
 import com.gnut3ll4.syncets.utils.GoogleTaskUtils;
+import com.gnut3ll4.syncets.utils.Utils;
+import com.securepreferences.SecurePreferences;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -38,48 +45,63 @@ public class BackgroundService extends WakefulIntentService {
         boolean pref_sync_courses = prefs.getBoolean("pref_sync_courses", true);
         boolean pref_sync_moodle = prefs.getBoolean("pref_sync_moodle", true);
         boolean pref_notif_courses = prefs.getBoolean("pref_notif_courses", true);
+        SecurePreferences securePreferences = new SecurePreferences(this);
 
-        if (pref_sync_courses)
-            GoogleCalendarUtils.syncCalendar(this, pref_notif_courses)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Object>() {
-                        @Override
-                        public void onCompleted() {
-                            Log.d("SYNCETS", "Calendar sync ended");
-                        }
+        Observable<Object> syncCalendar = Observable.empty();
+        Observable<Object> syncMoodleAssignments = Observable.empty();
 
-                        @Override
-                        public void onError(Throwable e) {
-                            e.printStackTrace();
-                        }
+        if (pref_sync_courses) {
+            syncCalendar = GoogleCalendarUtils.syncCalendar(this, pref_notif_courses);
+        }
+//                    .subscribeOn(Schedulers.newThread())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(new Observer<Object>() {
+//                        @Override
+//                        public void onCompleted() {
+//                            Log.d("SYNCETS", "Calendar sync ended");
+//                        }
+//
+//                        @Override
+//                        public void onError(Throwable e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        @Override
+//                        public void onNext(Object o) {
+//
+//                        }
+//                    });
 
-                        @Override
-                        public void onNext(Object o) {
+        if (pref_sync_moodle) {
+            syncMoodleAssignments = GoogleTaskUtils.syncMoodleAssignments(this);
+        }
 
-                        }
-                    });
+        rx.Observable.merge(syncCalendar, syncMoodleAssignments)
+                .flatMap(o -> {
+                    Utils.putDate(securePreferences,
+                            Constants.LAST_SYNC,
+                            new Date(),
+                            new GregorianCalendar().getTimeZone());
+                    return Observable.empty();
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Object>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("SYNCETS", "Moodle sync ended");
+                    }
 
-        if (pref_sync_moodle)
-            GoogleTaskUtils.syncMoodleAssignments(this)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Object>() {
-                        @Override
-                        public void onCompleted() {
-                            Log.d("SYNCETS", "Moodle sync ended");
-                        }
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
 
-                        @Override
-                        public void onError(Throwable e) {
-                            e.printStackTrace();
-                        }
+                    @Override
+                    public void onNext(Object o) {
 
-                        @Override
-                        public void onNext(Object o) {
-
-                        }
-                    });
+                    }
+                });
 
 
     }

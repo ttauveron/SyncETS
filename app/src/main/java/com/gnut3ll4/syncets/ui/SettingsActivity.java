@@ -24,7 +24,7 @@ public class SettingsActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getFragmentManager().beginTransaction().replace(R.id.flContent, new PreferenceSyncFragment()).commit();
+
     }
 
     @Override
@@ -34,6 +34,8 @@ public class SettingsActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivityForResult(intent, 0);
             finish();
+        } else {
+            getFragmentManager().beginTransaction().replace(R.id.flContent, new PreferenceSyncFragment()).commit();
         }
 
     }

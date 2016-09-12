@@ -27,4 +27,5 @@ public class Constants {
     public static final int REQUEST_ACCOUNT_PICKER = 2;
     public static final String FIRST_LOGIN = "FIRST_LOGIN";
     public static final boolean DEBUG_UPDATE_CHECK_SERVICE = false;
+    public static final String LAST_SYNC = "LAST_SYNC";
 }
