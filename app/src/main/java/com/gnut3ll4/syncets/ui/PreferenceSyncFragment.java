@@ -31,17 +31,16 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class PreferenceSyncFragment extends PreferenceFragment
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class PreferenceSyncFragment extends PreferenceFragment {
 
     SecurePreferences securePreferences;
+    SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
-        PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .registerOnSharedPreferenceChangeListener(this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         securePreferences = new SecurePreferences(getActivity());
 
         boolean firstLogin = securePreferences.getBoolean(Constants.FIRST_LOGIN, true);
@@ -96,7 +95,6 @@ public class PreferenceSyncFragment extends PreferenceFragment
                     linearLayoutProgress.setVisibility(View.VISIBLE);
                     syncButton.setVisibility(View.INVISIBLE);
 
-                    //TODO add preference check
                     rx.Observable.create(subscriber -> {
 
 
@@ -124,8 +122,10 @@ public class PreferenceSyncFragment extends PreferenceFragment
                                 public void onCompleted() {
                                     Log.d("SYNCETS", "UI sync ended");
                                     //todo add animation translate here
+                                    syncButton.setVisibility(
+                                            Utils.isSyncAvailableToday(getActivity()) ?
+                                                    View.VISIBLE : View.GONE);
                                     linearLayoutProgress.setVisibility(View.GONE);
-                                    syncButton.setVisibility(View.GONE);
                                     updateLastSync();
                                 }
 
@@ -158,14 +158,25 @@ public class PreferenceSyncFragment extends PreferenceFragment
 
     public rx.Observable<Object> getSyncObservable() {
 
-        //todo choose boolean sync options
-        rx.Observable<Object> syncCalendarEnded = GoogleCalendarUtils.syncCalendar(getActivity(), true)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
-        rx.Observable<Object> syncMoodleEnded = GoogleTaskUtils.syncMoodleAssignments(getActivity())
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
-        return Observable.merge(syncCalendarEnded, syncMoodleEnded)
+        boolean isSyncCoursesSelected = sharedPreferences.getBoolean("pref_sync_courses", true);
+        boolean isSyncMoodleSelected = sharedPreferences.getBoolean("pref_sync_moodle", true);
+        boolean isNotificationsActivated = sharedPreferences.getBoolean("pref_notif_courses", true);
+
+        rx.Observable<Object> syncCalendar = Observable.empty();
+        rx.Observable<Object> syncMoodle = Observable.empty();
+
+        if (isSyncCoursesSelected) {
+            syncCalendar = GoogleCalendarUtils.syncCalendar(getActivity(), isNotificationsActivated)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread());
+        }
+        if (isSyncMoodleSelected) {
+            syncMoodle = GoogleTaskUtils.syncMoodleAssignments(getActivity())
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread());
+        }
+
+        return Observable.merge(syncCalendar, syncMoodle)
                 .flatMap(o -> {
                     Utils.putDate(securePreferences,
                             Constants.LAST_SYNC,
@@ -173,33 +184,5 @@ public class PreferenceSyncFragment extends PreferenceFragment
                             new GregorianCalendar().getTimeZone());
                     return Observable.empty();
                 });
-
-//        Observable<Object> zip = Observable.zip(syncCalendarEnded, syncMoodleEnded, (o, o2) -> {
-//            Utils.putDate(securePreferences,
-//                    Constants.LAST_SYNC,
-//                    new Date(),
-//                    new GregorianCalendar().getTimeZone());
-//            return Observable.empty();
-//        });
-//
-//        return zip;
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        // handle the preference change here
-        switch (key) {
-            case "pref_sync_courses":
-                if (sharedPreferences.getBoolean(key, true)) {
-
-                }
-                break;
-            case "pref_sync_moodle":
-                break;
-            case "pref_notif_courses":
-                break;
-        }
-
-
     }
 }
