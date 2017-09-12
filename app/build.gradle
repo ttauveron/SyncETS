@@ -3,7 +3,7 @@ apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    buildToolsVersion '25.0.0'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -16,7 +16,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
-
+        multiDexEnabled true
 //        jackOptions {
 //            enabled true
 //        }
@@ -75,4 +75,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.github.medyo:fancybuttons:1.8.1'
     compile 'com.github.rahatarmanahmed:circularprogressview:2.5.0'
+
+    compile 'com.android.support:multidex:1.0.1'
 }

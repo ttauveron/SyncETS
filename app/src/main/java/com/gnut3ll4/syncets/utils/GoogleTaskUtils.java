@@ -56,7 +56,7 @@ public class GoogleTaskUtils {
 
 
                             Request request2 = new Request.Builder()
-                                    .url("https://ena.etsmtl.ca/webservice/rest/server.php?moodlewsrestformat=json&wstoken=" + token + "&wsfunction=moodle_webservice_get_siteinfo")
+                                    .url("https://ena.etsmtl.ca/webservice/rest/server.php?moodlewsrestformat=json&wstoken=" + token + "&wsfunction=core_webservice_get_site_info")
                                     .get()
                                     .build();
 
@@ -73,7 +73,7 @@ public class GoogleTaskUtils {
                             Request request3 = new Request.Builder()
                                     .url("https://ena.etsmtl.ca/webservice/rest/server.php?moodlewsrestformat=json&wstoken=" +
                                             ApplicationManager.userCredentials.getMoodleToken() +
-                                            "&wsfunction=moodle_enrol_get_users_courses&userid=" + userid)
+                                            "&wsfunction=core_enrol_get_users_courses&userid=" + userid)
                                     .get()
                                     .build();
 

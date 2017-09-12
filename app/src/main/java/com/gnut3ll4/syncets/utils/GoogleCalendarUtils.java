@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import rx.Observable;
 
@@ -160,10 +161,11 @@ public class GoogleCalendarUtils {
                             seance.coursGroupe + " - " + seance.nomActivite);
                     event.setLocation(seance.local);
 
+                    TimeZone tz = TimeZone.getDefault();
                     EventDateTime eventStartDateTime = new EventDateTime();
-                    eventStartDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateDebut.getTime() - Utils.getTimeZoneOffset()));
+                    eventStartDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateDebut.getTime() - tz.getOffset(seance.dateDebut.getTime())));
                     EventDateTime eventEndDateTime = new EventDateTime();
-                    eventEndDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateFin.getTime() - Utils.getTimeZoneOffset()));
+                    eventEndDateTime.setDateTime(new com.google.api.client.util.DateTime(seance.dateFin.getTime() - tz.getOffset(seance.dateDebut.getTime())));
 
                     event.setStart(eventStartDateTime);
                     event.setEnd(eventEndDateTime);

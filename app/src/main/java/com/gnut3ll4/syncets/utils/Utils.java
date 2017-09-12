@@ -8,13 +8,13 @@ import org.joda.time.DateTime;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public class Utils {
 
     /**
      * Returns the current code session : {Year}{1/2/3}
+     *
      * @return
      */
     public static String getCurrentCodeSession() {
@@ -43,14 +43,7 @@ public class Utils {
                 codeSession = 0;
                 break;
         }
-        return now.getYear()+""+codeSession;
-    }
-
-    public static long getTimeZoneOffset() {
-
-        //todo fix timezone
-        TimeZone mTimeZone = new GregorianCalendar().getTimeZone();
-        return mTimeZone.getRawOffset();
+        return now.getYear() + "" + codeSession;
     }
 
     public static Date getDate(final SecurePreferences prefs, final String key, final Date defValue) {
@@ -74,7 +67,7 @@ public class Utils {
 
         Date dateLastSync = getDate(securePreferences, Constants.LAST_SYNC, null);
 
-        if(dateLastSync==null){
+        if (dateLastSync == null) {
             return true;
         }
 
