@@ -1,6 +1,12 @@
 # SyncETS
 SyncETS permet de synchroniser l'emploi du temps ETS sur son Google Calendar dans le cloud.
 
+## Utilisation
+L'écran de connexion demande les identifiants ÉTS : code universel (AA12345) et mot de passe ETS afin d'accéder à l'API Signets et récupérer la liste des cours.
+On choisit ensuite le compte Google sur lequel on veut que la synchronisation s'effectue (Google calendar).
+
+L'application peut envoyer une notification 15 minutes avant le début de chaque cours. 
+Cela permet d'avoir le numéro du local dans la notification sans avoir à farfouiller dans son téléphone.
 
 ## Configuration
 L'application nécessite d'activer l'API Google calendar sur son propre compte Google. 
